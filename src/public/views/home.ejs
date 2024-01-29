@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager</title>
+    <style>
+        #task_box{
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        #task_list{
+            background-color: black;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div id="task_box">
+        <form onsubmit="create_task(event)">
+            <br>
+            <label>Task Manager</label>
+            <br>
+            <br>
+            <label>Enter a Task's Title</label>
+            <input name="title" required>
+            <br>
+            <br>
+            <label>Enter a Task's Description</label>
+            <input name="description" required>
+            <br>
+            <br>
+            <button type="submit">Create the Task</button>
+        </form>
+        <div id="task_list">
+            <br>
+            This is where the tasks will show
+        </div>
+    </div>
+    <script defer>
+        const create_task = (e)=>{
+            e.preventDefault()
+
+            const formData = new FormData(e.target) 
+            const title = formData.get("title")
+            const description = formData.get("description")
+
+            axios.post("/create_task",
+            {
+                title,description
+
+            }).then((response)=>{
+                document.getElementsByName("title")[0].value = ""
+                document.getElementsByName("description")[0].value = ""
+                const task_list = document.getElementById("task_list")
+                showTaskOnScreen(response.data.success,task_list,title,description)
+                console.log(response.data.message)
+            }).catch((err)=>{
+                console.log(err)
+            })
+        }
+
+
+        const showTaskOnScreen  = (success,task_list,title,description)=>{
+            try {
+                if(!success){
+                    return console.log("The task was not rendered on screen please refresh")
+                }
+                const new_div = document.createElement("div")
+                const new_label_title = document.createElement("label")
+                new_label_title.textContent = title
+                const new_label_description = document.createElement("label")
+                new_label_description.textContent = description
+                const isCompleted = document.createElement("input")
+                isCompleted.type = "checkbox"
+                isCompleted.value = "false";
+                isCompleted.checked = false;
+                new_div.appendChild(new_label_title)
+                new_div.appendChild(new_label_description)
+                new_div.appendChild(isCompleted)
+                task_list.appendChild(new_div)
+                return
+                
+            } catch (error) {
+                console.log(error)
+                console.log("The task was not rendered on screen please refresh")
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js" defer></script>
+</body>
+</html>
