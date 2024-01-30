@@ -14,6 +14,11 @@
         #task_list{
             background-color: black;
             color: white;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
         }
     </style>
 </head>
@@ -39,7 +44,7 @@
             This is where the tasks will show
         </div>
     </div>
-    <script>
+    <script defer>
         const create_task = async (e)=>{
             //To prevent redirection
             e.preventDefault()
@@ -91,6 +96,7 @@
                 for(let i = 0;i<all_tasks.length;i++){
 
                     const new_div = document.createElement("div")
+                    new_div.style.padding = "25px"
 
                     const new_label_title = document.createElement("label")
                     new_label_title.textContent = all_tasks[i].title
@@ -110,11 +116,31 @@
                         negateValue(this_id)
                     }
 
+                    const new_delete_button = document.createElement("button")
+                    new_delete_button.textContent = "Delete this task"
+
+                    //Function to run deleteTask on clicking the button
+                    new_delete_button.onclick = function(){
+                        let this_id = document.getElementById(all_tasks[i]._id)
+                        deleteATask(this_id)
+                    }
+
+                    const new_edit_button = document.createElement("button")
+                    new_edit_button.textContent = "Edit this task"
+
+                    new_edit_button.onclick = function(){
+                        let this_id = document.getElementById(all_tasks[i]._id)
+                        editATask(this_id)
+                    }
+
                     //Append the labels and input tag in the div 
                     //and append the div to the task_list 
                     new_div.appendChild(new_label_title)
-                    new_div.appendChild(new_label_description)
                     new_div.appendChild(isCompleted)
+                    new_div.appendChild(new_delete_button)
+                    new_div.appendChild(new_edit_button)
+                    new_div.appendChild(document.createElement("br"))
+                    new_div.appendChild(new_label_description)
                     task_list.appendChild(new_div)
 
                 }
@@ -133,12 +159,74 @@
                     isCompleted:this_id.checked,
                     this_id:this_id.getAttribute("id")
                 })
-                
+
                 console.log(didUpdate.data.message) 
             } catch (error) {
                 console.log(error)
             }
-            
+        }
+
+        let deleteATask = async (this_id)=>{
+            try {
+                const didItDelete = await axios.post("delete_task",
+                {
+                    this_id:this_id.getAttribute("id")
+                })
+                location.reload()
+                console.log(didItDelete.data.message)
+            } catch (error) {
+                console.log(error)
+            }
+        }
+
+        let editATask = async(this_id)=>{
+            let lastSibling = this_id.nextElementSibling;
+
+            // Loop through siblings until last sibling is found
+            while (lastSibling && lastSibling.nextElementSibling) {
+                lastSibling = lastSibling.nextElementSibling;
+            }
+
+            //Create a new input element and copy the text of the label
+            let new_input = document.createElement("input")
+            new_input.value = lastSibling.textContent
+
+            //Replace the label with input tag
+            lastSibling.parentNode.replaceChild(new_input,lastSibling)
+
+            //Disable the edit task button
+            let edit_button = new_input.previousElementSibling.previousElementSibling
+            console.log(edit_button)
+            edit_button.setAttribute("disabled","")
+
+            //Create a new button for saving after editing
+            const new_save_button = document.createElement("button")
+            new_save_button.textContent = "Save"
+            new_save_button.onclick = function(e){
+                console.log(e.target)
+                saveTheEditedTask(new_input)
+                location.reload()
+            }
+
+            new_input.parentNode.appendChild(new_save_button);
+
+            console.log(lastSibling)
+            if(!edit_button.nextElementSibling.nextElementSibling.nextElementSibling.textContent == "Save"){
+                edit_button.removeAttribute("disabled")
+            }
+        }
+
+        let saveTheEditedTask = async (input_tag)=>{
+            let text = input_tag.value
+            let check_box_id = input_tag.previousElementSibling.previousElementSibling.
+            previousElementSibling.previousElementSibling
+
+            const didEdit = await axios.post("edit_task",
+            {
+                this_id:check_box_id.getAttribute("id"),
+                text
+            })
+            console.log(didEdit.data.message)
         }
 
         // const showTaskOnScreen  = (success,task_list,title,description)=>{

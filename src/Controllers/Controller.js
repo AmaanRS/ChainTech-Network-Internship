@@ -71,4 +71,35 @@ const createTask = async(req,res)=>{
             return res.json({message:"The data did not get updated",success:false})        }
     }
 
-module.exports = { home, createTask, show_all_tasks, update_task }
+    const delete_task = async(req,res)=>{
+        try {
+            const { this_id } = req.body
+
+            const didDelete = await task_model.deleteOne({_id:this_id})
+            if(!didDelete){
+                return res.json({message:"The task could not be deleted",success:false})
+            }
+            return res.json({message:"The task has been deleted",success:true})
+        } catch (error) {
+            console.log(error)
+            return res.json({message:"The task could not be deleted",success:false})
+        }
+    }
+
+    const edit_task = async (req,res)=>{
+        try {
+            const { this_id, text } = req.body
+            
+            const didEdit = await task_model.updateOne({_id:this_id},{description:text})
+
+            if(!didEdit){
+                return res.json({message:"The task could not be edited",success:false})
+            }
+            return res.json({message:"The task has been edited",success:true})
+        } catch (error) {
+            console.log(error)
+            return res.json({message:"The task could not be edited",success:false})
+        }
+    }
+
+module.exports = { home, createTask, show_all_tasks, update_task, delete_task, edit_task }
