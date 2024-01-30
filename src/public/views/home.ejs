@@ -109,11 +109,16 @@
                     isCompleted.id = all_tasks[i]._id
                     isCompleted.checked = all_tasks[i].isCompleted;
 
+                    //If the check box is already checked, disable it 
+                    if(all_tasks[i].isCompleted == true){
+                        isCompleted.setAttribute("disabled","")
+                    }
                     //Function to run when chexbox is clicked
                     isCompleted.onclick = function(){
                         let this_id = document.getElementById(all_tasks[i]._id)
                         //Function to save the changed value
                         negateValue(this_id)
+                        location.reload()
                     }
 
                     const new_delete_button = document.createElement("button")
@@ -196,14 +201,15 @@
 
             //Disable the edit task button
             let edit_button = new_input.previousElementSibling.previousElementSibling
-            console.log(edit_button)
             edit_button.setAttribute("disabled","")
 
             //Create a new button for saving after editing
             const new_save_button = document.createElement("button")
             new_save_button.textContent = "Save"
-            new_save_button.onclick = function(e){
-                console.log(e.target)
+
+            new_save_button.onclick = function(){
+
+                //Function to save the edited task
                 saveTheEditedTask(new_input)
                 location.reload()
             }
@@ -218,6 +224,8 @@
 
         let saveTheEditedTask = async (input_tag)=>{
             let text = input_tag.value
+
+            //To get the check box which has the id attribute
             let check_box_id = input_tag.previousElementSibling.previousElementSibling.
             previousElementSibling.previousElementSibling
 
@@ -228,42 +236,6 @@
             })
             console.log(didEdit.data.message)
         }
-
-        // const showTaskOnScreen  = (success,task_list,title,description)=>{
-        //     try {
-
-        //         //If the saving of the task in database is unsuccessfull
-        //         if(!success){
-        //             return console.log("The task was not rendered on screen please refresh")
-        //         }
-
-        //         //Create a new div,labels,input tag and fill the data of fields in them
-        //         const new_div = document.createElement("div")
-
-        //         const new_label_title = document.createElement("label")
-        //         new_label_title.textContent = title
-
-        //         const new_label_description = document.createElement("label")
-        //         new_label_description.textContent = description
-
-        //         const isCompleted = document.createElement("input")
-        //         isCompleted.type = "checkbox"
-        //         isCompleted.value = "false";
-        //         isCompleted.checked = false;
-
-        //         //Append the labels and input tag in the div 
-        //         //and append the div to the task_list 
-        //         new_div.appendChild(new_label_title)
-        //         new_div.appendChild(new_label_description)
-        //         new_div.appendChild(isCompleted)
-        //         task_list.appendChild(new_div)
-        //         return
-                
-        //     } catch (error) {
-        //         console.log(error)
-        //         console.log("The task was not rendered on screen please refresh")
-        //     }
-        // }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js" defer onload="showAllTasksOnScreen()"></script>
 </body>
