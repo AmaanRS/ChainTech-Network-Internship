@@ -39,56 +39,144 @@
             This is where the tasks will show
         </div>
     </div>
-    <script defer>
-        const create_task = (e)=>{
+    <script>
+        const create_task = async (e)=>{
+            //To prevent redirection
             e.preventDefault()
 
+            //Get the data from the event
             const formData = new FormData(e.target) 
             const title = formData.get("title")
             const description = formData.get("description")
 
-            axios.post("/create_task",
+            //Make a post request to the endpoint
+            await axios.post("/create_task",
             {
                 title,description
 
             }).then((response)=>{
-                document.getElementsByName("title")[0].value = ""
-                document.getElementsByName("description")[0].value = ""
-                const task_list = document.getElementById("task_list")
-                showTaskOnScreen(response.data.success,task_list,title,description)
-                console.log(response.data.message)
+
+                //Make the input fields empty
+                clearInputFields()
+
+                //Renders all tasks on screen
+                showAllTasksOnScreen()
+
             }).catch((err)=>{
+                //Make the input fields empty
+                clearInputFields()
                 console.log(err)
             })
         }
 
+        const clearInputFields = ()=>{
+            document.getElementsByName("title")[0].value = ""
+            document.getElementsByName("description")[0].value = ""
+            console.log("Clear input fields")
+        }
 
-        const showTaskOnScreen  = (success,task_list,title,description)=>{
+        //Can be made better by only appending the task which is created rather than rendering all the tasks repeatedly
+        let showAllTasksOnScreen = async ()=>{
             try {
-                if(!success){
-                    return console.log("The task was not rendered on screen please refresh")
+
+                //Empty the previous contents of the task_list
+                let task_list = document.getElementById("task_list")
+                task_list.innerHTML = ""
+
+                //Get all the tasks from the database
+                let response = await axios.post("/show_all_tasks");
+                let all_tasks = response.data.data;
+
+                //Create new elements and display each task
+                for(let i = 0;i<all_tasks.length;i++){
+
+                    const new_div = document.createElement("div")
+
+                    const new_label_title = document.createElement("label")
+                    new_label_title.textContent = all_tasks[i].title
+
+                    const new_label_description = document.createElement("label")
+                    new_label_description.textContent = all_tasks[i].description
+
+                    const isCompleted = document.createElement("input")
+                    isCompleted.type = "checkbox"
+                    isCompleted.id = all_tasks[i]._id
+                    isCompleted.checked = all_tasks[i].isCompleted;
+
+                    //Function to run when chexbox is clicked
+                    isCompleted.onclick = function(){
+                        let this_id = document.getElementById(all_tasks[i]._id)
+                        //Function to save the changed value
+                        negateValue(this_id)
+                    }
+
+                    //Append the labels and input tag in the div 
+                    //and append the div to the task_list 
+                    new_div.appendChild(new_label_title)
+                    new_div.appendChild(new_label_description)
+                    new_div.appendChild(isCompleted)
+                    task_list.appendChild(new_div)
+
                 }
-                const new_div = document.createElement("div")
-                const new_label_title = document.createElement("label")
-                new_label_title.textContent = title
-                const new_label_description = document.createElement("label")
-                new_label_description.textContent = description
-                const isCompleted = document.createElement("input")
-                isCompleted.type = "checkbox"
-                isCompleted.value = "false";
-                isCompleted.checked = false;
-                new_div.appendChild(new_label_title)
-                new_div.appendChild(new_label_description)
-                new_div.appendChild(isCompleted)
-                task_list.appendChild(new_div)
-                return
-                
-            } catch (error) {
-                console.log(error)
-                console.log("The task was not rendered on screen please refresh")
+            
+            } catch (err) {
+                console.error(err);
             }
         }
+
+        let negateValue = async (this_id)=>{
+            //Get the id check the status of checkbox and negate it
+            try {
+                //Update the checkbox field in database
+                const didUpdate = await axios.post("update_task",
+                {
+                    isCompleted:this_id.checked,
+                    this_id:this_id.getAttribute("id")
+                })
+                
+                console.log(didUpdate.data.message) 
+            } catch (error) {
+                console.log(error)
+            }
+            
+        }
+
+        // const showTaskOnScreen  = (success,task_list,title,description)=>{
+        //     try {
+
+        //         //If the saving of the task in database is unsuccessfull
+        //         if(!success){
+        //             return console.log("The task was not rendered on screen please refresh")
+        //         }
+
+        //         //Create a new div,labels,input tag and fill the data of fields in them
+        //         const new_div = document.createElement("div")
+
+        //         const new_label_title = document.createElement("label")
+        //         new_label_title.textContent = title
+
+        //         const new_label_description = document.createElement("label")
+        //         new_label_description.textContent = description
+
+        //         const isCompleted = document.createElement("input")
+        //         isCompleted.type = "checkbox"
+        //         isCompleted.value = "false";
+        //         isCompleted.checked = false;
+
+        //         //Append the labels and input tag in the div 
+        //         //and append the div to the task_list 
+        //         new_div.appendChild(new_label_title)
+        //         new_div.appendChild(new_label_description)
+        //         new_div.appendChild(isCompleted)
+        //         task_list.appendChild(new_div)
+        //         return
+                
+        //     } catch (error) {
+        //         console.log(error)
+        //         console.log("The task was not rendered on screen please refresh")
+        //     }
+        // }
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js" defer onload="showAllTasksOnScreen()"></script>
 </body>
 </html>

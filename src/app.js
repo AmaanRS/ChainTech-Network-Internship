@@ -6,9 +6,7 @@ require("dotenv").config()
 
 const app = express()
 
-app.use(express.urlencoded({extended:true}))
 app.use(express.json())
-
 
 app.use(express.static(path.join(__dirname+"public/static")))
 
@@ -20,9 +18,10 @@ app.use("/",Routes)
 
 async function startServer(){
     try{
-        // Write the database url in the env file
+        //Connect to database
         await connectDB(process.env.MONGO_URI)
         console.log("Database is connected")
+        //Start the express server
         app.listen(process.env.PORT,()=>{
             console.log(`Express app running on port ${process.env.PORT}`)
         })
