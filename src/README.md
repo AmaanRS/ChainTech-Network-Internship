@@ -62,4 +62,6 @@ http://127.0.0.1:8000/
 
 - To Edit the Task click the Edit Task button
 
+- Errors if any will be displayed in Browsers Console
+
 END
