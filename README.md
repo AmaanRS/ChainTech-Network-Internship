@@ -61,5 +61,7 @@ http://127.0.0.1:8000/
 - To Mark the Task as completed click the Check Box
 
 - To Edit the Task click the Edit Task button
+  
+- Errors if any will be displayed in Browsers Console
 
 END
